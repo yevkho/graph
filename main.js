@@ -63,8 +63,13 @@ function knightsBoard() {
     allKnightMoves(0, 0, n); //creates graph representing connections for all board squares (adjacency list)
 
     let searchQueue = [startXY]; // array that will be used to explore the graph. // [[0,0]]
-    let visitedSquares = { [startXY]: true }; //object (hash-like) to keep track of visited nodes to avoid revisiting them. // { 0,0: true}
-    let predecessorSquares = {}; // object to keep track of each node's predecessor (each node one predecessor)
+    //object (hash-like) to keep track of visited nodes to avoid revisiting them. // { 0,0: true}
+    // let visitedSquares = { [startXY]: true };
+    let visitedSquaresSet = new Set(); // Set to keep track of visited nodes to avoid revisiting them.
+    visitedSquaresSet.add(startXY.toString());
+    // object to keep track of each node's predecessor (each node one predecessor)
+    // let predecessorSquares = {};
+    let predecessorSquaresMap = new Map(); // Map to keep track of each node's predecessor
 
     // Breadth-First Search (BFS) loop continues until all nodes in queue are processed
     while (searchQueue.length > 0) {
@@ -75,7 +80,10 @@ function knightsBoard() {
         // this loop shows all possible paths, not just the first shortest one (due to callback in forEach)
         //    currentSquareAdjacencyList.forEach((item) => {
         // check if square already been visited, if not then continue further down the loop
-        if (!visitedSquares[item]) {
+        if (
+          //(!visitedSquares[item])
+          !visitedSquaresSet.has(item.toString())
+        ) {
           //if item is the target, then the path is found and we can start reconstructing it
           if (item[0] == targetXY[0] && item[1] == targetXY[1]) {
             let path = [item]; //initialize path with target-node
@@ -84,7 +92,11 @@ function knightsBoard() {
               currentSquare[1] !== startXY[1]
             ) {
               path.push(currentSquare);
-              currentSquare = predecessorSquares[currentSquare]; //backtrack though predecessor object to build path from target to source
+              //backtrack though predecessor object to build path from target to source
+              //currentSquare = predecessorSquares[currentSquare];
+              currentSquare = predecessorSquaresMap.get(
+                currentSquare.toString()
+              ); // backtrack through predecessor map to build path from target to source
             }
             path.push(currentSquare); // push source square as final element
             path.reverse();
@@ -94,8 +106,10 @@ function knightsBoard() {
           }
           //add item to queue, mark as checked and set its predecessor
           searchQueue.push(item);
-          visitedSquares[item] = true;
-          predecessorSquares[item] = currentSquare;
+          //visitedSquares[item] = true;
+          visitedSquaresSet.add(item.toString());
+          //predecessorSquares[item] = currentSquare;
+          predecessorSquaresMap.set(item.toString(), currentSquare);
         }
         //      });
       }
